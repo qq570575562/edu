@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.SystemDictionaryItemMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.SystemDictionaryItem">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="intro" property="intro"/>
+        <association property="systemDictionary" javaType="SystemDictionary" columnPrefix="dic_">
+            <id property="id" column="id"/>
+            <result property="sn" column="sn"/>
+            <result property="name" column="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `systemdictionaryitem`
+    where id = #{id}
+  </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    insert into `systemdictionaryitem` (name, intro, parent_sn)
+    values (#{name}, #{intro}, #{systemDictionary.sn})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+    update `systemdictionaryitem`
+    set name = #{name},
+      intro = #{intro},
+      parent_sn = #{systemDictionary.sn}
+    where id = #{id}
+  </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select id, name, intro, parent_sn
+    from `systemdictionaryitem`
+    where id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, intro, parent_sn
+    from `systemdictionaryitem`
+  </select>
+    <select id="queryForCount" resultType="java.lang.Integer">
+      SELECT count(id) FROM systemdictionaryitem
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+    SELECT id, name, intro, parent_sn FROM systemdictionaryitem
+  </select>
+    <select id="queryBySn" resultMap="BaseResultMap">
+    SELECT item.id, item.name, item.intro, item.parent_sn,dic.id dic_id,dic.sn dic_sn,dic.name dic_name,dic.intro dic_intro FROM systemdictionaryitem item
+     LEFT JOIN systemdictionary dic ON item.parent_sn = dic.sn
+     WHERE item.parent_sn = #{sn}
+  </select>
+</mapper>

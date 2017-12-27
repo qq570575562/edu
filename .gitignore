@@ -1,0 +1,7 @@
+*.idea
+*.iml
+target
+.idea/ workspace.xml
+resources/rembel.xml
+resources/db.properties
+resources/generatorConfig.xml

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.PromotedStudentMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.PromotedStudent">
+        <id column="id" property="id"/>
+        <result column="auditState" property="auditState"/>
+        <result column="name" property="name"/>
+        <result column="totalTuition" property="totalTuition"/>
+        <result column="toPaidTuition" property="toPaidTuition"/>
+        <result column="paidTuition" property="paidTuition"/>
+        <result column="promoteOrRepeatDate" property="promoteOrRepeatDate"/>
+        <result column="tel" property="tel"/>
+        <!--员工封装-->
+        <association property="saleman" javaType="Employee" columnPrefix="sale_">
+            <id column="id" property="id"/>
+            <result column="realname" property="realname"/>
+        </association>
+        <association property="audit" javaType="Employee" columnPrefix="aud_">
+            <id column="id" property="id"/>
+            <result column="realname" property="realname"/>
+        </association>
+        <!--班级-->
+        <association property="classBefore" javaType="ClassGrade" columnPrefix="cb_">
+            <id column="id" property="id"/>
+            <result column="className" property="className"/>
+        </association>
+        <association property="classAfter" javaType="ClassGrade" columnPrefix="ca_">
+            <id column="id" property="id"/>
+            <result column="className" property="className"/>
+        </association>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `promotedstudent`
+    where id = #{id}
+  </delete>
+    <insert id="insert" parameterType="cn.wolfcode.edu.domain.PromotedStudent" useGeneratedKeys="true" keyProperty="id">
+    insert into `promotedstudent` ( name, totalTuition, toPaidTuition, paidTuition, 
+      promoteOrRepeatDate, tel, classBefore_id, classAfter_id, saleman_id,formalStudent_id,auditState
+      )
+    values (#{name}, #{totalTuition}, #{toPaidTuition}, #{paidTuition}, 
+      #{promoteOrRepeatDate}, #{tel}, #{classBefore.id}, #{classAfter.id}, #{saleman.id},#{formalStudentId},#{auditState}
+      )
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.PromotedStudent">
+    update `promotedstudent`
+      set 
+      name = #{name},
+      totalTuition = #{totalTuition},
+      toPaidTuition = #{toPaidTuition},
+      paidTuition = #{paidTuition},
+      promoteOrRepeatDate = #{promoteOrRepeatDate},
+      tel = #{tel},
+      classBefore_id = #{classBefore.id},
+      classAfter_id = #{classAfter.id},
+      saleman_id = #{saleman.id}
+    where id = #{id}
+  </update>
+    <!--更改状态-->
+    <update id="changeState">
+     update `promotedstudent`
+      set
+      auditState = auditState^1
+      where id = #{id}
+    </update>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select ps.id, ps.auditState, ps.audit_id, ps.name, ps.totalTuition, ps.toPaidTuition, ps.paidTuition, 
+    ps.promoteOrRepeatDate, ps.tel, ps.classBefore_id, ps.classAfter_id, ps.saleman_id,
+    cb.id as cb_id,cb.className AS cb_className,
+    ca.id as ca_id,ca.className AS ca_className,
+    sale.id as sale_id,sale.realname AS sale_realname,
+    aud.id as aud_id,aud.realname AS aud_realname
+    from `promotedstudent` ps
+    LEFT JOIN class cb ON ps.classBefore_id = cb.id
+    LEFT JOIN class ca ON ps.classAfter_id = ca.id
+    LEFT JOIN employee sale ON ps.saleman_id = sale.id
+    LEFT JOIN employee aud ON ps.audit_id = aud.id
+    where id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, auditState, audit_id, name, totalTuition, toPaidTuition, paidTuition, 
+    promoteOrRepeatDate, tel, classBefore_id, classAfter_id, saleman_id
+    from `promotedstudent`
+  </select>
+    <!--分页效果-->
+    <select id="queryForCount" resultType="java.lang.Integer">
+        SELECT COUNT(ps.id)
+        FROM promotedstudent ps
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+
+        select ps.id, ps.auditState, ps.audit_id, ps.name, ps.totalTuition, ps.toPaidTuition, ps.paidTuition,
+        ps.promoteOrRepeatDate, ps.tel, ps.classBefore_id, ps.classAfter_id, ps.saleman_id,
+        cb.id as cb_id,cb.className AS cb_className,
+        ca.id as ca_id,ca.className AS ca_className,
+        sale.id as sale_id,sale.realname AS sale_realname,
+        aud.id as aud_id,aud.realname AS aud_realname
+        from `promotedstudent` ps
+        LEFT JOIN class cb ON ps.classBefore_id = cb.id
+        LEFT JOIN class ca ON ps.classAfter_id = ca.id
+        LEFT JOIN employee sale ON ps.saleman_id = sale.id
+        LEFT JOIN employee aud ON ps.audit_id = aud.id
+        <include refid="baseSql"/>
+        limit #{beginIndex},#{rows}
+    </select>
+
+    <sql id="baseSql">
+        <where>
+            <if test="keyword !=null and keyword != ''">
+                AND (ps.name like concat('%',#{keyword},'%') or ps.classAfter_id like concat('%',#{keyword},'%'))
+            </if>
+            <if test="auditState != null">
+                and ps.auditState = #{auditState}
+            </if>
+
+            <if test="beginDate != null">
+                and ps.promoteOrRepeatDate >= #{beginDate}
+            </if>
+            <if test="endDate != null">
+                and ps.promoteOrRepeatDate &lt;= #{endDate}
+            </if>
+            <if test="afterClzId != null">
+                and ps.classAfter_id = #{afterClzId}
+            </if>
+        </where>
+    </sql>
+</mapper>

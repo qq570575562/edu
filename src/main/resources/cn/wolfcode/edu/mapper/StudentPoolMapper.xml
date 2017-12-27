@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.StudentPoolMapper" >
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.StudentPool" >
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+        <result column="gender" property="gender" />
+        <result column="tel" property="tel" />
+        <result column="qq" property="qq" />
+        <result column="email" property="email" />
+        <result column="filingTime" property="filingTime" />
+        <result column="weiChart" property="weiChart" />
+        <result column="school" property="school" />
+        <result column="inputTime" property="inputTime" />
+        <result column="lastTime" property="lastTime" />
+        <result column="address" property="address" />
+        <result column="followTime" property="followTime" />
+        <result column="major" property="major" />
+        <result column="aboutTIme" property="aboutTime" />
+        <result column="entranceTime" property="entranceTime" />
+        <result column="clientType" property="clientType" />
+        <result column="tailnum" property="tailnum" />
+        <result column="tail" property="tail" />
+        <result column="hasPaid" property="hasPaid" />
+        <result column="state" property="state" />
+        <result column="attention" property="attention" />
+        <result column="remark" property="remark" />
+        <!--下面字段需要使用内联或者额外sql-->
+        <!--<result column="student_id" property="studentId" />-->
+        <association property="classId" javaType="cn.wolfcode.edu.domain.ClassGrade">
+            <id column="c_id" property="id"/>
+            <result column="c_className" property="className"/>
+        </association>
+        <association property="universitytrace" javaType="cn.wolfcode.edu.domain.Universitytrace">
+            <id column="u_id" property="id"/>
+            <result column="u_name" property="name"/>
+        </association>
+        <!--连接数据字典-->
+        <association property="source" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+            <id column="source_id" property="id"/>
+            <result column="source_name" property="name"/>
+        </association>
+        <association property="intentionSchool" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+            <id column="intentionSchool_id" property="id"/>
+            <result column="intentionSchool_name" property="name"/>
+        </association>
+        <association property="intentionSubject" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+            <id column="intentionSubject_id" property="id"/>
+            <result column="intentionSubject_name" property="name"/>
+        </association>
+        <association property="education" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+            <id column="education_id" property="id"/>
+            <result column="education_name" property="name"/>
+        </association>
+        <association property="intentionDegree" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+            <id column="intentionDegree_id" property="id"/>
+            <result column="intentionDegree_name" property="name"/>
+        </association>
+        <association property="sale" javaType="cn.wolfcode.edu.domain.Employee">
+            <id column="e_id" property="id"/>
+            <result column="e_name" property="username"/>
+            <result column="e_realname" property="realname"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+        delete from studentPool
+        where id = #{id}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+        insert into `studentPool` (name, age, gender, tel, qq, email, filingTime, weiChart,
+        school, inputTime,lastTime, address, followTime, major, aboutTIme, entranceTime,
+        student_id, class_id, universitytrace_id, source_id, intentionSchool_id,
+        intentionSubject_id, education_id, intentionDegree_id, hasPaid, clientType,
+        state, attention, remark,sale_id,tailnum,tail)
+        values (#{name}, #{age}, #{gender}, #{tel}, #{qq}, #{email}, #{filingTime}, #{weiChart},
+        #{school}, #{inputTime},now(), #{address}, #{followTime}, #{major}, #{aboutTime}, #{entranceTime},
+        #{student.id}, #{classId.id}, #{universitytrace.id}, #{source.id}, #{intentionSchool.id},
+        #{intentionSubject.id}, #{education.id}, #{intentionDegree.id}, #{hasPaid}, #{clientType},
+        #{state}, #{attention}, #{remark},#{sale.id},0,false)
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.StudentPool" >
+        update `studentPool`
+        set name = #{name},
+        age = #{age},
+        gender = #{gender},
+        tel = #{tel},
+        qq = #{qq},
+        email = #{email},
+        filingTime = #{filingTime},
+        weiChart = #{weiChart},
+        school = #{school},
+        inputTime = #{inputTime},
+        lastTime = #{lastTime},
+        address = #{address},
+        followTime = #{followTime},
+        major = #{major},
+        aboutTIme = #{aboutTime},
+        entranceTime = #{entranceTime},
+        student_id = #{student.id},
+        class_id = #{classId.id},
+        universitytrace_id = #{universitytrace.id},
+        source_id = #{source.id},
+        intentionSchool_id = #{intentionSchool.id},
+        intentionSubject_id = #{intentionSubject.id},
+        education_id = #{education.id},
+        intentionDegree_id = #{intentionDegree.id},
+        hasPaid = #{hasPaid},
+        clientType = #{clientType},
+        state = #{state},
+        attention = #{attention},
+        remark = #{remark},
+        sale_id = #{sale.id}
+        where id = #{id}
+    </update>
+    <select id="selectAll" resultType="cn.wolfcode.edu.domain.StudentPool">
+        select * from studentPool
+    </select>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        select p.* ,
+        source.id source_id ,source.name source_name ,
+        intentionSchool.id intentionSchool_id ,intentionSchool.name intentionSchool_name ,
+        education.id education_id ,education.name education_name ,
+        intentionDegree.id intentionDegree_id ,intentionDegree.name intentionDegree_name ,
+        intentionSubject.id intentionSubject_id ,intentionSubject.name intentionSubject_name,
+        un.id u_id ,un.name u_name,
+        c.id c_id ,c.className c_className,
+        e.username e_name ,e.id e_id,e.realname e_realname,
+        fs.name fs_name,fs.id fs_id
+        from studentPool p left join universitytrace u on p.universitytrace_id = u.id
+        left join systemdictionaryitem source on p.source_id = source.id
+        left join systemdictionaryitem intentionSchool on p.intentionSchool_id = intentionSchool.id
+        left join systemdictionaryitem intentionSubject on p.intentionSubject_id = intentionSubject.id
+        left join systemdictionaryitem education on p.education_id = education.id
+        left join systemdictionaryitem intentionDegree on p.intentionDegree_id = intentionDegree.id
+        <!--关联其他表-->
+        left join universitytrace un on p.universitytrace_id = un.id
+        left join class c on c.id = p.class_id
+        left join employee e on p.sale_id = e.id
+        left join FormalStudent fs on p.student_id = fs.id
+        where p.id = #{id}
+    </select>
+    <select id="queryCount" resultType="int">
+        select count(*) from studentPool p
+        <include refid="baseSlq"/>
+    </select>
+    <select id="queryList" resultMap="BaseResultMap">
+        select p.* ,
+        source.id source_id ,source.name source_name ,
+        intentionSchool.id intentionSchool_id ,intentionSchool.name intentionSchool_name ,
+        education.id education_id ,education.name education_name ,
+        intentionDegree.id intentionDegree_id ,intentionDegree.name intentionDegree_name ,
+        intentionSubject.id intentionSubject_id ,intentionSubject.name intentionSubject_name,
+        un.id u_id ,un.name u_name,
+        c.id c_id ,c.className c_className,
+        e.username e_name ,e.id e_id,e.realname e_realname,
+        fs.name fs_name,fs.id fs_id
+        from studentPool p left join universitytrace u on p.universitytrace_id = u.id
+        left join systemdictionaryitem source on p.source_id = source.id
+        left join systemdictionaryitem intentionSchool on p.intentionSchool_id = intentionSchool.id
+        left join systemdictionaryitem intentionSubject on p.intentionSubject_id = intentionSubject.id
+        left join systemdictionaryitem education on p.education_id = education.id
+        left join systemdictionaryitem intentionDegree on p.intentionDegree_id = intentionDegree.id
+        <!--关联其他表-->
+        left join universitytrace un on p.universitytrace_id = un.id
+        left join class c on c.id = p.class_id
+        left join employee e on p.sale_id = e.id
+        left join FormalStudent fs on p.student_id = fs.id
+        <include refid="baseSlq"/>
+    </select>
+    <update id="changState">
+        update studentPool set state = true where id = #{id}
+    </update>
+    <sql id="baseSlq">
+        <where>
+            <if test="keyword!=null">
+                and p.state = 0
+            </if>
+            <if test="startTime!=null">
+                and p.inputTime &gt; #{startTime}
+            </if>
+            <if test="endTime!=null">
+                and p.inputTIme &lt; #{endTime}
+            </if>
+        </where>
+    </sql>
+    <update id="tailnum">
+        update studentPool set tailnum = tailnum + 1 ,tail = true  where id = #{id}
+    </update>
+    <select id="checkstu" resultType="cn.wolfcode.edu.domain.StudentPool">
+        select id,name from studentPool where state = 0
+    </select>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.SalaryMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Salary">
+        <id column="id" property="id"/>
+        <result column="month" property="month"/>
+        <result column="salary" property="salary"/>
+        <result column="workDay" property="workDay"/>
+        <result column="afterNumber" property="afterNumber"/>
+        <result column="beforeNumber" property="beforeNumber"/>
+        <result column="resignNumber" property="resignNumber"/>
+        <result column="nowSalary" property="nowSalary"/>
+        <result column="paytime" property="paytime"/>
+        <association property="employee" javaType="Employee" columnPrefix="emp_">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="realname" property="realname"/>
+            <result column="salary" property="salary"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `salary`
+    where id = #{id}
+  </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    insert into `salary` (`month`, salary, workDay, afterNumber, beforeNumber, resignNumber, 
+      nowSalary, paytime,employee_id)
+    values (#{month}, #{salary}, #{workDay}, #{afterNumber}, #{beforeNumber}, #{resignNumber}, 
+      #{nowSalary}, #{paytime},#{employee.id})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Salary">
+    update `salary`
+    set `month` = #{month},
+      salary = #{salary},
+      workDay = #{workDay},
+      afterNumber = #{afterNumber},
+      beforeNumber = #{beforeNumber},
+      resignNumber = #{resignNumber},
+      nowSalary = #{nowSalary},
+      paytime = #{paytime},
+      employee_id = #{employee.id}
+    where id = #{id}
+  </update>
+    <update id="updateSalary" parameterType="cn.wolfcode.edu.domain.Salary">
+    update `salary` set salary = #{salary} where id = #{id}
+  </update>
+    <insert id="insertSalary" useGeneratedKeys="true" keyProperty="id">
+        insert into `salary` (`month`, salary, workDay, afterNumber, beforeNumber, resignNumber,employee_id)
+        values (#{month}, #{employee.salary},
+        (select count(*) from `attendance` where (month(signInDay) =month(#{month}) and employee_id = #{employee.id})),
+        (select count(*) from `attendance` where (month(signInDay) = month(#{month}) and employee_id =#{employee.id} AND signInState =0)),
+        (select count(*)  from `attendance` where (month(signInDay) = month(#{month}) and employee_id =#{employee.id} AND signOutState =0)),
+        (select count(*) from `attendance` where (month(signInDay) = month(#{month}) and employee_id = #{employee.id} and resignInDate is NOT null)),
+         #{employee.id})
+        </insert>
+
+    <update id="updateForRow" parameterType="cn.wolfcode.edu.domain.Salary">
+    update `salary` SET 
+      workDay=(select count(*) from `attendance` where (month(signInDay) = month(#{month}) and employee_id = #{employee.id})),
+      afterNumber =(select count(*) from `attendance` where (month(signInDay) = month(#{month}) and employee_id =#{employee.id} AND signInState =0)),
+      beforeNumber = (select count(*)  from `attendance` where (month(signInDay) = month(#{month}) and employee_id =#{employee.id} AND signOutState =0)),
+      resignNumber = (select count(*) from `attendance` where (month(signInDay) = month(#{month}) and employee_id = #{employee.id} and resignInDate is NOT null))
+    where id = #{id}
+ 
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select id, `month`, salary, workDay, afterNumber, beforeNumber, resignNumber, nowSalary,paytime,employee_id
+    from `salary`
+    where id = #{id}
+  </select>
+    <select id="selectByMonth" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select s.id, s.`month`, s.salary, s.workDay, s.afterNumber, s.beforeNumber, s.resignNumber, s.nowSalary, s.paytime,s.employee_id,
+       emp.id emp_id,emp.username emp_username,emp.realname emp_realname,emp.salary emp_salary
+    from `salary` s
+    LEFT JOIN employee emp ON s.employee_id = emp.id
+    where s.employee_id = #{employeeId} and month(month) = month(#{month})
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select s.id, s.`month`, s.salary, s.workDay, s.afterNumber, s.beforeNumber, s.resignNumber, s.nowSalary, 
+    s.paytime,employee_id,
+     emp.id emp_id,emp.username emp_username,emp.realname emp_realname,emp.salary emp_salary
+    from `salary` s
+    LEFT JOIN employee emp ON s.employee_id = emp.id
+  </select>
+    <select id="queryForCount" resultType="java.lang.Integer">
+        SELECT COUNT(s.id)
+        from `salary` s
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+        select s.id, s.`month`, s.salary, s.workDay, s.afterNumber, s.beforeNumber, s.resignNumber, s.nowSalary,
+        s.paytime,s.employee_id,
+        emp.id emp_id,emp.username emp_username,emp.realname emp_realname,emp.salary emp_salary
+        from `salary` s
+        LEFT JOIN employee emp ON s.employee_id = emp.id
+        <include refid="baseSql"/>
+        LIMIT #{beginIndex},#{rows}
+
+    </select>
+
+    <sql id="baseSql">
+        <where>
+            <if test="keyword !=null and keyword!=''">
+                and emp.realname LIKE concat('%',#{keyword},'%')
+            </if>
+            <if test="beginDate != null">
+                and s.month &gt;#{beginDate}
+            </if>
+            <if test="endDate != null">
+                and s.month &lt;#{endDate}
+            </if>
+        </where>
+    </sql>
+
+</mapper>

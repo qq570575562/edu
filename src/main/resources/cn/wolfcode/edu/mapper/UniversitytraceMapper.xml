@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.UniversitytraceMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Universitytrace">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="address" property="address"/>
+        <result column="prevTranceTime" property="prevtrancetime"/>
+        <result column="nextTranceTime" property="nexttrancetime"/>
+        <result column="traceState" property="tracestate"/>
+        <result column="customerStatus" property="customerstatus"/>
+        <result column="schoolTel" property="schooltel"/>
+        <result column="email" property="email"/>
+        <result column="stuNumber" property="stunumber"/>
+        <result column="itStuNumber" property="itstunumber"/>
+        <result column="telegraph" property="telegraph"/>
+        <result column="postcode" property="postcode"/>
+        <result column="teacherNumber" property="teachernumber"/>
+        <result column="remark" property="remark"/>
+        <result column="introduction" property="introduction"/>
+        <!--数据字典-->
+        <association property="college" javaType="SystemDictionaryItem" columnPrefix="col_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+        <association property="importance" javaType="SystemDictionaryItem" columnPrefix="imp_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+        <association property="wantedlevel" javaType="SystemDictionaryItem" columnPrefix="want_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+        <association property="subject" javaType="SystemDictionaryItem" columnPrefix="sub_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+        <association property="type" javaType="SystemDictionaryItem" columnPrefix="ty_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+            <result column="intro" property="intro"/>
+        </association>
+        <!--2个员工-->
+        <association property="marketer" javaType="Employee" columnPrefix="market_">
+            <id column="id" property="id"></id>
+            <result column="realname" property="realname"/>
+        </association>
+        <association property="tracer" javaType="Employee" columnPrefix="tracer_">
+            <id column="id" property="id"></id>
+            <result column="realname" property="realname"/>
+        </association>
+        <!--1个学校-->
+        <association property="contact" javaType="Contact" columnPrefix="cont_">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"/>
+        </association>
+    </resultMap>
+    
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `universitytrace`
+    where id = #{id}
+  </delete>
+    <insert id="insert" parameterType="cn.wolfcode.edu.domain.Universitytrace" useGeneratedKeys="true" keyProperty="id">
+    insert into `universitytrace` (name, address, importance_id, wantedLevel_id, subject_id, contact_id, 
+      marketer_id, tracer_id, prevTranceTime, nextTranceTime, traceState, 
+      customerStatus, schoolTel, email, stuNumber, itStuNumber, type_id, 
+      telegraph, postcode, teacherNumber, remark, introduction,college_id)
+    values (#{name}, #{address}, #{importance.id}, #{wantedlevel.id}, #{subject.id}, #{contact.id},
+      #{marketer.id}, #{tracer.id}, #{prevtrancetime}, #{nexttrancetime}, #{tracestate},
+      #{customerstatus}, #{schooltel}, #{email}, #{stunumber}, #{itstunumber}, #{type.id}, 
+      #{telegraph}, #{postcode}, #{teachernumber}, #{remark}, #{introduction},#{college.id})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Universitytrace">
+    update `universitytrace`
+    set name = #{name},
+      address = #{address},
+      importance_id = #{importance.id},
+      wantedLevel_id = #{wantedlevel.id},
+      subject_id = #{subject.id},
+      contact_id = #{contact.id},
+      marketer_id = #{marketer.id},
+      tracer_id = #{tracer.id},
+      prevTranceTime = #{prevtrancetime},
+      nextTranceTime = #{nexttrancetime},
+      traceState = #{tracestate},
+      schoolTel = #{schooltel},
+      email = #{email},
+      stuNumber = #{stunumber},
+      itStuNumber = #{itstunumber},
+      type_id = #{type.id},
+      telegraph = #{telegraph},
+      postcode = #{postcode},
+      teacherNumber = #{teachernumber},
+      remark = #{remark},
+      introduction = #{introduction},
+      college_id = #{college.id}
+    where id = #{id}
+  </update>
+    <!--更新签约状态-->
+    <update id="changeState">
+        update `universitytrace`
+        set  customerStatus = customerStatus^1
+        where id = #{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select un.id, un.name, un.address, un.importance_id, un.wantedLevel_id, un.subject_id, un.contact_id, 
+    un.marketer_id, un.tracer_id, un.prevTranceTime, un.nextTranceTime, un.traceState, un.customerStatus, 
+    un.schoolTel, un.email, un.stuNumber, un.itStuNumber, un.type_id, un.telegraph, un.postcode, un.teacherNumber, 
+    un.remark, un.introduction,
+    imp.id AS imp_id,imp.name AS imp_name,
+    want.id AS want_id,want.name AS want_name,
+    sub.id AS sub_id,sub.name AS sub_name,
+    ty.id AS ty_id,ty.name AS ty_name,
+    col.id AS col_id,col.name AS col_name,
+    market.id AS market_id,market.realname AS market_realname,
+    tracer.id AS tracer_id,tracer.realname AS tracer_realname,
+    cont.id AS cont_id,cont.name AS cont_name
+    from `universitytrace` un
+    LEFT JOIN systemdictionaryitem imp ON un.importance_id = imp.id
+    LEFT JOIN systemdictionaryitem want ON un.wantedLevel_id = want.id
+    LEFT JOIN systemdictionaryitem sub ON un.subject_id = sub.id
+    LEFT JOIN systemdictionaryitem ty ON un.type_id = ty.id
+    LEFT JOIN systemdictionaryitem col ON un.college_id = col.id
+    LEFT JOIN employee market ON un.marketer_id = market.id
+    LEFT JOIN employee tracer ON un.tracer_id = tracer.id
+    LEFT JOIN contact cont ON un.contact_id = cont.id
+    where id = #{id}
+  </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, address, importance_id, wantedLevel_id, subject_id, contact_id, 
+    marketer_id, tracer_id, prevTranceTime, nextTranceTime, traceState, customerStatus, 
+    schoolTel, email, stuNumber, itStuNumber, type_id, telegraph, postcode, teacherNumber, 
+    remark, introduction
+    from `universitytrace`
+  </select>
+    <!--分页查询-->
+    <select id="queryForCount" resultType="int">
+       select count(un.id)
+       FROM  `universitytrace` un
+        <include refid="baseSql"/>
+    </select>
+
+    <select id="queryForList" resultMap="BaseResultMap">
+      select un.id, un.name, un.address, un.importance_id, un.wantedLevel_id, un.subject_id, un.contact_id,
+    un.marketer_id, un.tracer_id, un.prevTranceTime, un.nextTranceTime, un.traceState, un.customerStatus,
+    un.schoolTel, un.email, un.stuNumber, un.itStuNumber, un.type_id, un.telegraph, un.postcode, un.teacherNumber,
+    un.remark, un.introduction,
+    imp.id AS imp_id,imp.name AS imp_name,
+    want.id AS want_id,want.name AS want_name,
+    sub.id AS sub_id,sub.name AS sub_name,
+    ty.id AS ty_id,ty.name AS ty_name,
+    col.id AS col_id,col.name AS col_name,
+    market.id AS market_id,market.realname AS market_realname,
+    tracer.id AS tracer_id,tracer.realname AS tracer_realname,
+    cont.id AS cont_id,cont.name AS cont_name
+    from `universitytrace` un
+    LEFT JOIN systemdictionaryitem imp ON un.importance_id = imp.id
+    LEFT JOIN systemdictionaryitem want ON un.wantedLevel_id = want.id
+    LEFT JOIN systemdictionaryitem sub ON un.subject_id = sub.id
+    LEFT JOIN systemdictionaryitem ty ON un.type_id = ty.id
+    LEFT JOIN systemdictionaryitem col ON un.college_id = col.id
+    LEFT JOIN employee market ON un.marketer_id = market.id
+    LEFT JOIN employee tracer ON un.tracer_id = tracer.id
+    LEFT JOIN contact cont ON un.contact_id = cont.id
+    <include refid="baseSql"/>
+    limit #{beginIndex},#{rows}
+    </select>
+    <sql id="baseSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+               and (un.name like concat('%',#{keyword},'%') or un.address like concat('%',#{keyword},'%'))
+            </if>
+            <if test="subjectId !=null and subjectId>0 ">
+               and un.subject_id = #{subjectId}
+            </if>
+        </where>
+    </sql>
+</mapper>

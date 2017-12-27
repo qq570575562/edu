@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.RunoffMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Runoff" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="tel" property="tel" />
+    <result column="livedate" property="livedate" />
+    <result column="state" property="state" />
+    <result column="fsid" property="fsid" />
+    <result column="cause" property="cause" />
+    <result column="backMoney" property="backMoney" />
+    <result column="audit" property="audit" />
+    <association property="classId" javaType="cn.wolfcode.edu.domain.ClassGrade">
+         <id column="c_id" property="id"/>
+         <result column="c_name" property="className"/>
+    </association>
+    <association property="sale" javaType="cn.wolfcode.edu.domain.Employee">
+        <id column="sale_id" property="id"/>
+        <result column="sale_name" property="realname"/>
+    </association>
+    <association property="auditor" javaType="cn.wolfcode.edu.domain.Employee">
+        <id column="ad_id" property="id"/>
+        <result column="ad_name" property="realname"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `runoff`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.Runoff" useGeneratedKeys="true" keyProperty="id" >
+    insert into `runoff` (name, tel, livedate, state, class_id, sale_id, audit, 
+      auditor_id, cause,fsid,backMoney)
+    values (#{name}, #{tel}, #{livedate}, #{state}, #{classId}, #{sale.id}, #{audit},
+      #{auditor.id}, #{cause},#{fsid},#{backMoney})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Runoff" >
+    update `runoff`
+    set name = #{name},
+      tel = #{tel},
+      livedate = #{livedate},
+      state = #{state},
+      class_id = #{classId},
+      sale_id = #{sale.id},
+      auditor_id = #{auditor.id},
+      cause = #{cause},
+      backMoney = #{backMoney}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        select rf.* ,
+        sale.realname sale_name ,sale.id sale_id ,
+        ad.realname ad_name ,ad.id ad_id
+        from runoff rf
+        left join employee sale on rf.sale_id = sale.id
+        left join employee ad on rf.auditor_id = ad.id
+        where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select rf.* ,
+        sale.realname sale_name ,sale.id sale_id ,
+        ad.realname ad_name ,ad.id ad_id
+        from runoff rf
+        left join employee sale on rf.sale_id = sale.id
+        left join employee ad on rf.auditor_id = ad.id
+  </select>
+    <select id="queryCount" resultType="int">
+        select count(*) from runoff rf
+    </select>
+    <select id="queryList" resultMap="BaseResultMap">
+        select rf.* ,
+        sale.realname sale_name ,sale.id sale_id ,
+        ad.realname ad_name ,ad.id ad_id
+        from runoff rf
+        left join employee sale on rf.sale_id = sale.id
+        left join employee ad on rf.auditor_id = ad.id
+        limit #{beginIndex},#{rows}
+    </select>
+</mapper>

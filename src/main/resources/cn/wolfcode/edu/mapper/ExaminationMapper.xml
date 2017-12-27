@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.ExaminationMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Examination" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="qq" property="qq" />
+    <result column="tel" property="tel" />
+    <result column="examtime" property="examtime" />
+    <result column="result" property="result" />
+      <association property="saleman" javaType="cn.wolfcode.edu.domain.Employee">
+          <id column="sale_id" property="id"/>
+          <result column="sale_realname" property="realname"/>
+      </association>
+      <association property="handler" javaType="cn.wolfcode.edu.domain.Employee">
+          <id column="handler_id" property="id"/>
+          <result column="handler_realname" property="realname"/>
+      </association>
+      <association property="classId" javaType="cn.wolfcode.edu.domain.ClassGrade">
+          <id column="c_id" property="id"/>
+          <result column="c_name" property="className"/>
+      </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `examination`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.Examination" useGeneratedKeys="true" keyProperty="id" >
+    insert into `examination` (name, saleman_id, qq, tel, class_id, examtime, result, 
+      handler_id,psId)
+    values (#{name}, #{saleman.id}, #{qq}, #{tel}, #{classId.id}, #{examtime}, #{result},
+      #{handler.id},#{psId})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Examination" >
+    update `examination`
+    set name = #{name},
+      saleman_id = #{saleman.id},
+      qq = #{qq},
+      tel = #{tel},
+      class_id = #{classId.id},
+      examtime = #{examtime},
+      handler_id = #{handler.id}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, name, saleman_id, qq, tel, class_id, examtime, result, handler_id,psId
+    from `examination`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select
+      en.id, en.name, en.saleman_id, en.qq, en.tel, en.class_id,
+	  en.examtime,en.result, en.handler_id,en.psId,
+	  sale.id sale_id ,sale.realname sale_realname ,
+      handler.id handler_id ,handler.realname handler_realname,
+      c.id c_id ,c.classname c_name
+      from examination en
+	  left join employee sale on en.saleman_id = sale.id
+      left join employee handler on handler.id = en.handler_id
+      left join class c on en.class_id = c.id
+      left join potentialstudent p on en.psId = p.id
+  </select>
+    <select id="queryForCount" resultType="int">
+        select count(*) from examination en
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+      select
+      en.id, en.name, en.saleman_id, en.qq, en.tel, en.class_id,
+	  en.examtime,en.result, en.handler_id,en.psId,
+	  sale.id sale_id ,sale.realname sale_realname ,
+      handler.id handler_id ,handler.realname handler_realname,
+      c.id c_id ,c.classname c_name
+      from examination en
+	  left join employee sale on en.saleman_id = sale.id
+      left join employee handler on handler.id = en.handler_id
+      left join class c on en.class_id = c.id
+      left join potentialstudent p on en.psId = p.id
+      <include refid="baseSql"/>
+      limit #{beginIndex},#{rows}
+    </select>
+    <update id="changState">
+        update examination set result = result^1 ,handler_id = #{handlerId} where id = #{id}
+    </update>
+    <sql id="baseSql">
+        <where>
+            <if test="psId!=null">
+                en.psId = #{psId}
+            </if>
+        </where>
+    </sql>
+    <select id="selectPsId" resultType="long">
+        select psId from examination
+    </select>
+</mapper>

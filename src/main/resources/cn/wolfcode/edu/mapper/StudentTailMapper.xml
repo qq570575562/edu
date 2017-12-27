@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.StudentTailMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.StudentTail" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="qq" property="qq" />
+    <result column="email" property="email" />
+    <result column="tel" property="tel" />
+    <result column="tailnum" property="tailnum" />
+    <result column="state" property="state" />
+    <result column="lasttime" property="lasttime" />
+    <result column="aboutTime" property="abouttime" />
+    <result column="followTime" property="followtime" />
+    <result column="duration" property="duration" />
+    <result column="digest" property="digest" />
+    <result column="content" property="content" />
+    <result column="thistime" property="thistime" />
+    <result column="audioex" property="audioex" />
+
+      <association property="sale" javaType="cn.wolfcode.edu.domain.Employee">
+          <id column="e_id" property="id"/>
+          <result column="e_name" property="realname"/>
+      </association>
+      <association property="university" javaType="cn.wolfcode.edu.domain.Universitytrace">
+          <id column="u_id" property="id"/>
+          <result column="u_name" property="name"/>
+      </association>
+      <association property="classId" javaType="cn.wolfcode.edu.domain.ClassGrade">
+          <id column="c_id" property="id"/>
+          <result column="c_name" property="className"/>
+      </association>
+      <association property="exchange" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+          <id column="exchange_id" property="id"/>
+          <result column="exchange_name" property="name"/>
+      </association>
+      <association property="appraise" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+          <id column="apps_id" property="id"/>
+          <result column="apps_name" property="name"/>
+      </association>
+      <association property="goal" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+          <id column="goal_id" property="id"/>
+          <result column="goal_name" property="name"/>
+      </association>
+      <association property="intentiondegree" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+          <id column="intentionDegree_id" property="id"/>
+          <result column="intentionDegree_name" property="name"/>
+      </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `studenttail`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.StudentTail" useGeneratedKeys="true" keyProperty="id" >
+    insert into `studenttail` (name, qq, email, tel, state, sale_id, lasttime, university_id, 
+      class_id, aboutTime, exchange_id, intentionDegree_id, followTime, goal_id, 
+      duration, digest, content, thistime ,tailnum,pid)
+    values (#{name}, #{qq}, #{email}, #{tel}, #{state}, #{sale.id}, #{lasttime}, #{university.id},
+      #{classId.id}, #{abouttime}, #{exchange.id}, #{intentiondegree.id}, #{followtime}, #{goal.id},
+      #{duration}, #{digest}, #{content}, now(),#{tailnum},#{pid})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.StudentTail" >
+    update `studenttail`
+    set name = #{name},
+      qq = #{qq},
+      email = #{email},
+      tel = #{tel},
+      state = #{state},
+      sale_id = #{sale.id},
+      lasttime = #{lasttime},
+      university_id = #{university.id},
+      class_id = #{classId.id},
+      aboutTime = #{abouttime},
+      exchange_id = #{exchange.id},
+      intentionDegree_id = #{intentiondegree.id},
+      followTime = #{followtime},
+      goal_id = #{goal.id},
+      duration = #{duration},
+      digest = #{digest},
+      content = #{content},
+      thistime = now(),
+      tailnum = #{tailnum}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        select st.*,
+        e.id e_id ,e.realname e_name ,
+        u.id u_id ,u.name u_name ,
+        c.id c_id ,c.className c_name ,
+        exchange.id exchange_id ,exchange.name exchange_name,
+        appraise.id appraise_id ,appraise.name appraise_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name,
+        goal.id goal_id ,goal.name goal_name
+        from studenttail st
+        left join employee e on st.sale_id = e.id
+        left join universitytrace u on st.university_id = u.id
+        left join class c on st.class_id = c.id
+        left join systemdictionaryitem exchange on st.exchange_id = exchange.id
+        left join systemdictionaryitem appraise on st.appraise_id = appraise.id
+        left join systemdictionaryitem intentiondegree on st.intentiondegree_id = intentiondegree.id
+        left join systemdictionaryitem goal on st.goal_id = goal.id
+        left join systemdictionaryitem appraise on st.appraise_id = appraise.id
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+     select st.*,
+        e.id e_id ,e.realname e_name ,
+        u.id u_id ,u.name u_name ,
+        c.id c_id ,c.className c_name ,
+        exchange.id exchange_id ,exchange.name exchange_name,
+        appraise.id appraise_id ,appraise.name appraise_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name,
+        goal.id goal_id ,goal.name goal_name
+        from studenttail st
+        left join employee e on st.sale_id = e.id
+        left join universitytrace u on st.university_id = u.id
+        left join class c on st.class_id = c.id
+        left join systemdictionaryitem exchange on st.exchange_id = exchange.id
+        left join systemdictionaryitem appraise on st.appraise_id = appraise.id
+        left join systemdictionaryitem intentiondegree on st.intentiondegree_id = intentiondegree.id
+        left join systemdictionaryitem goal on st.goal_id = goal.id
+        left join systemdictionaryitem appraise on st.appraise_id = appraise.id
+  </select>
+    <select id="queryCount" resultType="int">
+        select count(*) from studenttail st
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryList" resultMap="BaseResultMap">
+       select st.*,
+        e.id e_id ,e.realname e_name ,
+        u.id u_id ,u.name u_name ,
+        c.id c_id ,c.className c_name ,
+        exchange.id exchange_id ,exchange.name exchange_name,
+        apps.id apps_id ,apps.name apps_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name,
+        goal.id goal_id ,goal.name goal_name
+        from studenttail st
+        left join employee e on st.sale_id = e.id
+        left join universitytrace u on st.university_id = u.id
+        left join class c on st.class_id = c.id
+        left join systemdictionaryitem exchange on st.exchange_id = exchange.id
+        left join systemdictionaryitem appraise on st.appraise_id = appraise.id
+        left join systemdictionaryitem intentiondegree on st.intentiondegree_id = intentiondegree.id
+        left join systemdictionaryitem goal on st.goal_id = goal.id
+        left join systemdictionaryitem apps on st.appraise_id = apps.id
+        <include refid="baseSql"/>
+        <if test="lasttime!=null">
+            ORDER BY st.thistime DESC
+        </if>
+        limit #{beginIndex},#{rows}
+    </select>
+    <update id="changState">
+        update studenttail set state = state + 1 ,audioex = #{audioex},appraise_id = #{appraise.id}
+        <if test="sale.id!=null">,sale_id = #{sale.id}</if>
+        where id = #{id}
+    </update>
+    <sql id="baseSql">
+        <where>
+            <if test="pid!=null">
+                st.pid = #{pid}
+            </if>
+        </where>
+    </sql>
+</mapper>

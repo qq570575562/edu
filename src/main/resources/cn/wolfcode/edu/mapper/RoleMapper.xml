@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Role">
+        <id column="id" property="id"/>
+        <result column="sn" property="sn"/>
+        <result column="name" property="name"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `role`
+    where id = #{id}
+  </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    insert into `role` (sn, name)
+    values (#{sn}, #{name})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Role">
+    update `role`
+    set sn = #{sn},
+      name = #{name}
+    where id = #{id}
+  </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select id, sn, name
+    from `role`
+    where id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, sn, name
+    from `role`
+  </select>
+
+    <insert id="insertRelation">
+        INSERT INTO `role_permission` (role_id,permission_id) VALUES
+        <foreach collection="permissions" separator="," item="permisson">
+            (#{roleId},#{permisson.id})
+        </foreach>
+    </insert>
+
+    <delete id="deleteRelation" parameterType="long">
+    DELETE FROM `role_permission` WHERE role_id=#{roleId}
+  </delete>
+
+    <select id="getRoleByEmployeeId" resultType="java.lang.String">
+        select r.sn
+        from `role` r
+        LEFT JOIN employee_role er ON r.id = er.role_id
+        LEFT JOIN employee emp ON er.employee_id = emp.id
+        where emp.id = #{id}
+    </select>
+
+
+</mapper>

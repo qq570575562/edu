@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.ChartMapper" >
+
+  <sql id="whereSql">
+    <where>
+      <if test="keyword!= null and keyword != ''">
+        and (saleman.realname LIKE concat('%',#{keyword},'%') or f.address LIKE concat('%',#{keyword},'%')
+        or f.school LIKE concat('%',#{keyword},'%') or f.tel LIKE concat('%',#{keyword},'%') or f.name LIKE concat('%',#{keyword},'%'))
+      </if>
+      <if test="beginTime != null">
+        AND f.enrollDate >= #{beginTime}
+      </if>
+      <if test="endTime != null">
+        AND f.enrollDate &lt;= #{endTime}
+      </if>
+    </where>
+  </sql>
+  <select id="queryForCount" resultType="int">
+    SELECT COUNT(*) FROM (SELECT DISTINCT ${groupByName} groupBy from formalstudent f
+    left join systemdictionaryitem sys on sys.id = f.paymode_id
+    left join employee saleman on f.saleman_id = saleman.id
+    <include refid="whereSql"/>
+    ) as groupName
+
+  </select>
+  <select id="queryForList" resultType="cn.wolfcode.edu.domain.FormalStudentChart">
+    SELECT ${groupByName} groupBy,sum(f.paidTuition) paidTuition,sum(f.ownTuition) ownTuition,count(case when f.ownTuition=0 then 1 else 0 end) AS paidNumber
+    from formalstudent f
+    left join systemdictionaryitem sys on sys.id = f.paymode_id
+    left join employee saleman on f.saleman_id = saleman.id
+    <include refid="whereSql"/>
+    group by ${groupByName}
+    <if test="rows!=0 or page != 0">
+      limit #{beginIndex},#{rows}
+    </if>
+  </select>
+</mapper>

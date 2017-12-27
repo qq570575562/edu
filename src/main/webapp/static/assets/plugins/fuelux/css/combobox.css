@@ -1,0 +1,7 @@
+.fuelux .combobox.disabled .input-group-btn {
+    cursor: not-allowed;
+}
+
+.fuelux .combobox input::-ms-clear {
+    display: none;
+}

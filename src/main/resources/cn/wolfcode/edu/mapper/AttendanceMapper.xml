@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.AttendanceMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Attendance">
+        <id column="id" property="id"/>
+        <result column="signInDay" property="signInDay"/>
+        <result column="signInTime" property="signInTime"/>
+        <result column="signInIp" property="signInIp"/>
+        <result column="signOutTime" property="signOutTime"/>
+        <result column="signInState" property="signInState"/>
+        <result column="signOutState" property="signOutState"/>
+        <result column="resignInDate" property="resignInDate"/>
+        <result column="cause" property="cause"/>
+        <association property="employee" javaType="Employee" columnPrefix="emp_">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="realname" property="realname"/>
+        </association>
+        <association property="supEmployee" javaType="Employee" columnPrefix="sup_">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="realname" property="realname"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `attendance`
+    where id = #{id}
+  </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    insert into `attendance` (signInDay,signInTime,signInIp,signOutTime, signInState, signOutState, resignInDate, 
+      employee_id,supEmployee_id,cause)
+    values (#{signInDay},#{signInTime},#{signInIp}, #{signOutTime}, #{signInState}, #{signOutState}, #{resignInDate},#{employee.id},#{supEmployee.id},#{cause})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Attendance">
+    update `attendance`
+    set 
+       signInState = #{signInState},
+       signOutState = #{signOutState},
+      resignInDate = #{resignInDate},
+      supEmployee_id = #{supEmployee.id},
+      cause = #{cause}
+       where id = #{id}
+  </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select id,signInDay, signInTime,signInIp, signOutTime, signInState, signOutState, resignInDate, employee_id,supEmployee_id,cause
+    from `attendance`
+    where id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select att.id,att.signInDay,att.signInTime,att.signInIp,att.signOutTime, att.signInState,att.signOutState,
+        att.resignInDate, att.employee_id ,att.supEmployee_id,att.cause,
+        emp.id emp_id,emp.username emp_username,emp.realname emp_realname,
+        sup.username sup_username,sup.realname sup_realname
+        FROM `attendance` att
+        LEFT JOIN employee emp ON att.employee_id =emp.id
+        LEFT JOIN employee sup ON att.supEmployee_id =sup.id
+  </select>
+    <update id="signOut" parameterType="cn.wolfcode.edu.domain.Attendance">
+      update `attendance`
+      set 
+      signOutTime = #{signOutTime},
+      signOutState = #{signOutState}
+    where id = #{id}
+    </update>
+
+    <!--分页查询-->
+    <select id="queryForCount" resultType="java.lang.Integer">
+        SELECT COUNT(att.id)
+        FROM `attendance` att
+        LEFT JOIN employee emp ON att.employee_id =emp.id
+        LEFT JOIN employee sup ON att.supEmployee_id =sup.id
+        <include refid="baseSql"/>
+    </select>
+
+    <select id="queryForList" resultMap="BaseResultMap">
+        select att.id,att.signInDay,att.signInTime,att.signInIp,att.signOutTime, att.signInState,att.signOutState,
+        att.resignInDate, att.employee_id ,att.supEmployee_id,att.cause,
+        emp.id emp_id,emp.username emp_username,emp.realname emp_realname,
+        sup.username sup_username,sup.realname sup_realname
+        FROM `attendance` att
+        LEFT JOIN employee emp ON att.employee_id =emp.id
+        LEFT JOIN employee sup ON att.supEmployee_id =sup.id
+        <include refid="baseSql"/>
+        ORDER BY att.signInDay
+        LIMIT #{beginIndex},#{rows}
+    </select>
+    <select id="checkSignIn" resultMap="BaseResultMap">
+    select id,signInDay,signInTime,signInIp,signOutTime, signInState, signOutState, resignInDate, employee_id,cause
+    from `attendance`
+    where (employee_id = #{employeeId} and  signInDay = Date(#{signDate}))
+    </select>
+    <select id="checkSignInByMonth" resultType="java.lang.Long">
+    select COUNT(*)
+    from `attendance`
+    where (employee_id = #{employeeId} and month(signInDay) = month(#{month}))
+    </select>
+
+    <sql id="baseSql">
+        <where>
+            <if test="keyword !=null and keyword!=''">
+                and (emp.username LIKE concat('%',#{keyword},'%') or sup.username LIKE concat('%',#{keyword},'%'))
+            </if>
+            <if test="beginDate != null">
+                and att.signInDay &gt;#{beginDate}
+            </if>
+            <if test="endDate != null">
+                and att.signInDay &lt;#{endDate}
+            </if>
+        </where>
+    </sql>
+</mapper>

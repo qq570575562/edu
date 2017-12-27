@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.DesignateHistoryMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.DesignateHistory" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="tel" property="tel" />
+    <result column="qq" property="qq" />
+    <result column="minute" property="minute" />
+    <result column="assigntime" property="assigntime" />
+    <association property="classId" javaType="cn.wolfcode.edu.domain.ClassGrade">
+        <id column="c_id" property="id"/>
+        <id column="c_name" property="className"/>
+    </association>
+    <association property="intentiondegree" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem">
+        <id column="intentiondegree_id" property="id"/>
+        <result column="intentiondegree_name" property="name"/>
+    </association>
+    <association property="source" javaType="cn.wolfcode.edu.domain.Employee">
+        <id column="source_id" property="id"/>
+        <result column="source_name" property="realname"/>
+    </association>
+      <association property="target" javaType="cn.wolfcode.edu.domain.Employee">
+          <id column="target_id" property="id"/>
+          <result column="target_name" property="realname"/>
+      </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `designatehistory`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.DesignateHistory" useGeneratedKeys="true" keyProperty="id" >
+    insert into `designatehistory` (name, tel, qq, assigntime, class_id, intentionDegree_id, 
+      source_id, target_id,minute)
+    values (#{name}, #{tel}, #{qq}, now(), #{classId.id}, #{intentiondegree.id},
+      #{source.id}, #{target.id},#{minute})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.DesignateHistory" >
+    update `designatehistory`
+    set name = #{name},
+      tel = #{tel},
+      qq = #{qq},
+      assigntime = now(),
+      minute = #{minute},
+      class_id = #{classId.id},
+      intentionDegree_id = #{intentiondegree.id},
+      source_id = #{source.id},
+      target_id = #{target.id}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select dh.id, dh.name, dh.tel, dh.qq, dh.assigntime, dh.class_id, dh.intentionDegree_id, dh.source_id, dh.target_id, dh.minute,
+        c.id c_id ,c.className c_name ,
+        source.id source_id ,source.realname source_name,
+        target.id target_id ,target.realname target_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name
+      from `designatehistory` dh left join class c on dh.class_id = c.id
+      left join employee source on dh.source_id = source.id
+      left join employee target on dh.target_id = target.id
+      left join systemDictionaryitem intentiondegree on dh.intentionDegree_id = intentiondegree.id`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select dh.id, dh.name, dh.tel, dh.qq, dh.assigntime, dh.class_id, dh.intentionDegree_id, dh.source_id, dh.target_id, dh.minute,
+        c.id c_id ,c.className c_name ,
+        source.id source_id ,source.realname source_name,
+        target.id target_id ,target.realname target_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name
+      from `designatehistory` dh left join class c on dh.class_id = c.id
+      left join employee source on dh.source_id = source.id
+      left join employee target on dh.target_id = target.id
+      left join systemDictionaryitem intentiondegree on dh.intentionDegree_id = intentiondegree.id
+  </select>
+    <select id="queryCount" resultType="int">
+        select count(*) from designatehistory dh
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryList" resultMap="BaseResultMap">
+      select dh.id, dh.name, dh.tel, dh.qq, dh.assigntime, dh.class_id, dh.intentionDegree_id, dh.source_id, dh.target_id, dh.minute,
+        c.id c_id ,c.className c_name ,
+        source.id source_id ,source.realname source_name,
+        target.id target_id ,target.realname target_name,
+        intentiondegree.id intentiondegree_id ,intentiondegree.name intentiondegree_name
+      from `designatehistory` dh left join class c on dh.class_id = c.id
+      left join employee source on dh.source_id = source.id
+      left join employee target on dh.target_id = target.id
+      left join systemDictionaryitem intentiondegree on dh.intentionDegree_id = intentiondegree.id
+      <include refid="baseSql"/>
+    </select>
+    <sql id="baseSql">
+        <where>
+            <if test="srcId!=null">
+                dh.source_id = #{srcId}
+            </if>
+            <if test="tarId!=null">
+                dh.target_id = #{tarId}
+            </if>
+        </where>
+    </sql>
+</mapper>

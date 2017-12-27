@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.SystemLogMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.SystemLog">
+        <id column="id" property="id"/>
+        <result column="optime" property="optime"/>
+        <result column="opip" property="opip"/>
+        <result column="function" property="function"/>
+        <result column="parmas" property="parmas"/>
+        <association column="opuser_id" property="opuser" javaType="Employee" columnPrefix="emp_">
+            <id column="id" property="id"/>
+            <result property="username" column="username"/>
+            <result property="realname" column="realname"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `systemlog`
+    where id = #{id}
+  </delete>
+    <delete id="deleteAll">
+    delete from `systemlog`
+  </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    insert into `systemlog` (opuser_id, optime, opip, function, parmas)
+    values (#{opuser.id}, #{optime}, #{opip}, #{function}, #{parmas})
+  </insert>
+
+    <!--分页查询-->
+    <select id="queryForCount" resultType="java.lang.Integer">
+        SELECT COUNT(log.id)
+        from `systemlog` log
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+      select log.id, log.opuser_id, log.optime, log.opip, log.function, log.parmas,
+      emp.id AS emp_id,emp.username AS emp_username,emp.realname AS emp_realname
+      from `systemlog` log LEFT JOIN `employee` emp ON log.opuser_id = emp.id 
+      limit #{beginIndex},#{rows}
+    </select>
+</mapper>

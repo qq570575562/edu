@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="cn.wolfcode.edu"/>
+    <!--引入配置文件-->
+    <context:property-placeholder location="classpath:db.properties" system-properties-mode="NEVER"/>
+
+    <!--配置连接池-->
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--配置SessionFactory-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybaties-config.xml"/>
+        <property name="mapperLocations" value="classpath:cn/wolfcode/edu/mapper/*Mapper.xml"/>
+        <property name="typeAliasesPackage" value="cn.wolfcode.edu.domain"/>
+    </bean>
+
+    <!--配置事物-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置日志记录类-->
+    <bean class="cn.wolfcode.edu.util.SystyemLogUtil" id="systemLog"/>
+
+    <!--配置增强-->
+    <tx:advice id="txAdvice">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="select*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="query*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置AOP-->
+    <aop:config>
+        <aop:pointcut id="point" expression="execution(* cn.wolfcode.edu.service.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="point"/>
+        <!--在操作之后记录-->
+        <aop:aspect ref="systemLog">
+            <aop:after method="writerLog" pointcut-ref="point"></aop:after>
+        </aop:aspect>
+    </aop:config>
+
+
+    <!--配置接口扫描器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
+        <property name="basePackage" value="cn.wolfcode.edu.mapper"/>
+    </bean>
+</beans>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.IncomeItemMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.IncomeItem" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="className" property="className" />
+    <result column="inputTime" property="inputTime" />
+    <result column="inMoney" property="inMoney" />
+    <result column="ownTuition" property="ownTuition" />
+    <result column="paee" property="paee" />
+    <result column="info" property="info" />
+    <result column="saleman" property="saleman" />
+    <result column="status" property="status" />
+    <result column="auditor" property="auditor" />
+    <result column="FormalStudent_id" property="formalstudentId" />
+
+    <association property="payMode" javaType="SystemDictionaryItem" columnPrefix="pm_">
+      <id column="id" property="id"/>
+      <result column="name" property="name" />
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `incomeitem`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.IncomeItem" useGeneratedKeys="true" keyProperty="id" >
+    insert into `incomeitem` (name, className, inputTime, inMoney, ownTuition, payMode, 
+      paee, info, saleman, status, auditor, FormalStudent_id)
+    values (#{name}, #{className}, #{inputTime}, #{inMoney}, #{ownTuition}, #{payMode.id},
+      #{paee}, #{info}, #{saleman}, #{status}, #{auditor}, #{formalstudentId})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.IncomeItem" >
+    update `incomeitem`
+    set
+      FormalStudent_id = #{formalstudentId},
+      className = #{className},
+      inputTime = #{inputTime},
+      inMoney = #{inMoney},
+      ownTuition = #{ownTuition},
+      payMode = #{payMode.id},
+      paee = #{paee},
+      info = #{info},
+      saleman = #{saleman}
+    where id = #{id}
+  </update>
+
+  <!--更新审核状态-->
+  <update id="changeState">
+     update `incomeitem`
+      set status = status^1
+    where id = #{id}
+  </update>
+  <!--更新审核人-->
+  <update id="updateAuditor">
+    update `incomeitem`
+      set auditor = #{name}
+    where id = #{id}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, name, className, inputTime, inMoney, ownTuition, payMode, paee, info, 
+    saleman, status, auditor, FormalStudent_id,formalstudent_id
+    from `incomeitem`
+    where id = #{id}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select ic.id, ic.name, ic.className, ic.inputTime, ic.inMoney, ic.ownTuition, ic.payMode, ic.paee, ic.info,
+    ic.saleman, ic.status, ic.auditor,formalstudent_id
+    from `incomeitem` ic
+  </select>
+  
+  <select id="queryForCount" resultType="int">
+    SELECT COUNT(ic.id)
+    FROM `incomeitem` ic
+    <include refid="baseSql"/>
+  </select>
+
+  <select id="queryForList" resultMap="BaseResultMap">
+
+    select ic.id, ic.name, ic.className, ic.inputTime, ic.inMoney, ic.ownTuition, ic.payMode, ic.paee, ic.info,
+    ic.saleman, ic.status, ic.auditor,formalstudent_id,
+    pm.id AS pm_id,pm.name AS pm_name
+    from `incomeitem` ic
+    LEFT JOIN systemdictionaryitem pm ON ic.payMode = pm.id
+    <include refid="baseSql"/>
+  </select>
+
+  <sql id="baseSql">
+    <where>
+      <if test="keyword !=null and keyword != ''">
+        AND ic.name like concat('%',#{keyword},'%')
+      </if>
+      <if test="beginDate != null">
+        and ic.inputTime >= #{beginDate}
+      </if>
+      <if test="endDate != null">
+        and ic.inputTime &lt;= #{endDate}
+      </if>
+      <if test="className != null">
+        and ic.className like concat('%',#{className},'%')
+      </if>
+    </where>
+  </sql>
+</mapper>

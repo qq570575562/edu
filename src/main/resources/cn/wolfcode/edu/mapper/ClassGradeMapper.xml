@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.ClassGradeMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.ClassGrade" >
+    <id column="id" property="id" />
+    <result column="classname" property="className" />
+    <result column="studentcount" property="studentCount" />
+    <result column="state" property="state" />
+    <association property="leader" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="leader_">
+      <id property="id" column="id"/>
+      <result property="realname" column="realname"/>
+    </association>
+    <association property="classroom" javaType="cn.wolfcode.edu.domain.Classroom" columnPrefix="cr_">
+      <id property="id" column="id"/>
+      <result property="name" column="name"/>
+    </association>
+    <association property="systemDictionaryItem" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="sys_">
+      <id property="id" column="id"/>
+      <result property="name" column="name"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `class`
+    where id = #{id}
+  </delete>
+  <insert id="insert"  useGeneratedKeys="true" keyProperty="id" >
+    insert into `class` (classname, studentcount, college_id, state, classroom_id, leader_id
+      )
+    values (#{className}, #{studentCount}, #{systemDictionaryItem.id}, #{state}, #{classroom.id}, #{leader.id}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.ClassGrade" >
+    update `class`
+    set classname = #{className},
+      studentcount = #{studentCount},
+      college_id = #{systemDictionaryItem.id},
+      state = #{state},
+      classroom_id = #{classroom.id},
+      leader_id = #{leader.id}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, classname, studentcount, college_id, state, classroom_id, leader_id
+    from `class`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, classname, studentcount, college_id, state, classroom_id, leader_id
+    from `class`
+  </select>
+  <select id="queryForCount" resultType="java.lang.Integer">
+    SELECT count(c.id) FROM class c
+    JOIN systemdictionaryitem sys on c.college_id = sys.id
+    JOIN classroom cr on c.classroom_id = cr.id
+    LEFT JOIN employee leader on c.leader_id = leader.id
+  </select>
+  <select id="queryForList" resultMap="BaseResultMap">
+    select  c.id, c.classname, c.studentcount,
+    sys.id sys_id, sys.name sys_name, c.state, cr.id cr_id,cr.name cr_name, leader.id leader_id,leader.realname leader_realname
+    from class c
+    JOIN systemdictionaryitem sys on c.college_id = sys.id
+    JOIN classroom cr on c.classroom_id = cr.id
+    LEFT JOIN employee leader on c.leader_id = leader.id
+    limit #{beginIndex},#{rows}
+  </select>
+  <select id="queryByClassroomId" resultMap="BaseResultMap">
+    select  c.id, c.classname, c.studentcount,
+    sys.id sys_id, sys.name sys_name, c.state, cr.id cr_id,cr.name cr_name, leader.id leader_id,leader.realname leader_realname
+    from class c
+    JOIN systemdictionaryitem sys on c.college_id = sys.id
+    JOIN classroom cr on c.classroom_id = cr.id
+    LEFT JOIN employee leader on c.leader_id = leader.id
+    WHERE c.classroom_id = #{id}
+  </select>
+  <update id="saveDis">
+    UPDATE class SET leader_id = #{empId} where id = #{classId}
+  </update>
+  <update id="openClass">
+    UPDATE class SET state = 1 WHERE id = #{id}
+  </update>
+</mapper>

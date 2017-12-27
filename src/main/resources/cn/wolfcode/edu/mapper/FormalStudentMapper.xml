@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.FormalStudentMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.FormalStudent" >
+
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="qqNum" property="qqNum" />
+    <result column="enrollDate" property="enrollDate" />
+    <result column="age" property="age" />
+    <result column="gander" property="gander" />
+    <result column="tel" property="tel" />
+    <result column="email" property="email" />
+
+    <result column="address" property="address" />
+    <result column="school" property="school" />
+    <result column="major" property="major" />
+    <result column="yearsOfWorking" property="yearsOfWorking" />
+    <result column="state" property="state" />
+
+    <result column="totalTuition" property="totalTuition" />
+    <result column="planningTuition" property="planningTuition" />
+    <result column="discountAmount" property="discountAmount" />
+    <result column="otherCost" property="otherCost" />
+    <result column="otherDiscount" property="otherDiscount" />
+    <result column="discountDesc" property="discountDesc" />
+    <result column="paidTuition" property="paidTuition" />
+    <result column="ownTuition" property="ownTuition" />
+    <result column="lastPaymentDate" property="lastPaymentDate" />
+    <result column="prePaidTuition" property="prePaidTuition" />
+    <result column="paidState" property="paidState" />
+    <result column="identityNum" property="identityNum" />
+    <result column="urgentContact" property="urgentContact" />
+    <result column="urgentTel" property="urgentTel" />
+    <result column="workingExperience" property="workingExperience" />
+
+    <!--联表数据(数据字典)-->
+    
+    <association property="payMode" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="pm_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <association property="source" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="sour_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <association property="education" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="edu_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <association property="foreignLangLevel" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="fll_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <association property="clientType" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="ct_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <!--关键字intentionSchool-->
+    <association property="campus" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="cms_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+    <!--外联其他表-->
+    <association property="clz" javaType="ClassGrade" columnPrefix="clz_">
+      <id column="id" property="id"/>
+      <result column="className" property="className"/>
+    </association>
+    <association property="saleman" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="emp_">
+      <id column="id" property="id"/>
+      <result column="realname" property="realname"/>
+    </association>
+    <!--这里需要再建一张中间表,然后要么关联数据字典,要么再建一张表-->
+    <!--<result column="employeementIntention_id" property="employeementintentionId" />-->
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `formalstudent`
+    where id = #{id}
+  </delete>
+  <!--转正功能来处理-->
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.FormalStudent" useGeneratedKeys="true" keyProperty="id" >
+    insert into `formalstudent` (name, qqNum, enrollDate, source_id, age, gander,address,tel,
+      email, education_id, school, major, foreignlanglevel_id, yearsOfWorking,
+      clz_id, paymode_id, clientType_id, state, saleman_id, campus_id,totalTuition, planningTuition,
+      discountAmount, otherCost, otherDiscount, discountDesc, paidTuition, 
+      ownTuition, lastPaymentDate, prePaidTuition, paidState, identityNum, 
+      urgentContact, urgentTel,workingExperience )
+    values (#{name}, #{qqNum}, #{enrollDate}, #{source.id}, #{age}, #{gander},#{address}, #{tel},
+      #{email}, #{education.id}, #{school}, #{major}, #{foreignLangLevel.id}, #{yearsOfWorking}, 
+      #{clz.id}, #{payMode.id}, #{clientType.id}, #{state}, #{saleman.id}, #{campus.id},#{totalTuition}, #{planningTuition},
+      #{discountAmount}, #{otherCost}, #{otherDiscount}, #{discountDesc}, #{paidTuition}, 
+      #{ownTuition}, #{lastPaymentDate}, #{prePaidTuition}, #{paidState}, #{identityNum},
+      #{urgentContact}, #{urgentTel} ,#{workingExperience})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.FormalStudent" >
+    update `formalstudent`
+    set name = #{name},
+      qqNum = #{qqNum},
+      enrollDate = #{enrollDate},
+      source_id = #{source.id},
+      age = #{age},
+      gander = #{gander},
+      address = #{address},
+      tel = #{tel},
+      email = #{email},
+      education_id = #{education.id},
+      school = #{school},
+      major = #{major},
+      foreignlanglevel_id = #{foreignLangLevel.id},
+      yearsOfWorking = #{yearsOfWorking},
+      clz_id = #{clz.id},
+      paymode_id = #{payMode.id},
+      clientType_id = #{clientType.id},
+      saleman_id = #{saleman.id},
+      campus_id = #{campus.id},
+      identityNum = #{identityNum},
+      urgentContact = #{urgentContact},
+      urgentTel = #{urgentTel},
+      workingExperience = #{workingExperience}
+    where id = #{id}
+  </update>
+  <!--改变休学的状态-->
+  <update id="changeState">
+    UPDATE formalstudent
+    SET
+    state = #{state}
+    where id = #{id}
+  </update>
+  <!--改变支付状态-->
+  <update id="setpaidState">
+    UPDATE formalstudent
+    SET
+    paidState = #{paidState}
+    where id = #{id}
+  </update>
+  <!--学员收款管理-->
+  <update id="updateIncomeItem">
+    UPDATE formalstudent
+    SET
+    ownTuition = #{ownTuition},
+    paidTuition = #{paidTuition},
+    lastPaymentDate = #{lastPaymentDate}
+    where id = #{id}
+  </update>
+  <!--设置-->
+  <update id="setClassIdById">
+    UPDATE formalstudent
+    SET clz_id = #{afterClassId}
+    where id = #{id}
+  </update>
+  <!--
+      留给收款管理来处理
+      planningTuition = #{planningTuition},
+      discountAmount = #{discountAmount},
+      otherCost = #{otherCost},
+      otherDiscount = #{otherDiscount},
+      discountDesc = #{discountDesc},
+      paidTuition = #{paidTuition},
+      ownTuition = #{ownTuition},
+      lastPaymentDate = #{lastPaymentDate},
+      prePaidTuition = #{prePaidTuition},
+      paidState = #{paidState},
+      employeementIntention_id = #{employeementintentionId}
+
+  -->
+
+
+  <!--查询出一个数据-->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select fs.id, fs.name, fs.qqNum, fs.enrollDate, fs.source_id, fs.age, fs.gander,fs.address, fs.tel, fs.email, fs.education_id,
+    fs.school, fs.major, fs.foreignlanglevel_id, fs.yearsOfWorking, fs.clz_id, fs.paymode_id, fs.clientType_id,
+    fs.state, fs.saleman_id, fs.campus_id,fs.totalTuition, fs.planningTuition, fs.discountAmount, fs.otherCost, fs.otherDiscount,
+    fs.discountDesc, fs.paidTuition, fs.ownTuition, fs.lastPaymentDate, fs.prePaidTuition, fs.paidState,
+    fs.identityNum, fs.urgentContact, fs.urgentTel,fs.workingExperience,
+    sour.id AS sour_id,sour.name AS sour_name,
+    edu.id AS edu_id,edu.name AS edu_name,
+    fll.id AS fll_id,fll.name AS fll_name,
+    cms.id AS cms_id,cms.name AS cms_name,
+    ct.id AS ct_id,ct.name AS ct_name,
+    emp.id AS emp_id,emp.realname AS emp_realname,
+    clz.id AS clz_id,clz.classname AS clz_classname
+    from `formalstudent` fs
+    LEFT JOIN SystemDictionaryItem sour ON fs.source_id = sour.id
+    LEFT JOIN SystemDictionaryItem edu ON fs.education_id = edu.id
+    LEFT JOIN SystemDictionaryItem fll ON fs.foreignlanglevel_id = fll.id
+    LEFT JOIN SystemDictionaryItem cms ON fs.campus_id = cms.id
+    LEFT JOIN SystemDictionaryItem ct ON fs.clientType_id = ct.id
+    LEFT JOIN employee emp ON fs.saleman_id = emp.id
+    LEFT JOIN class clz ON fs.clz_id = clz.id
+    where fs.id = #{id}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, qqNum, enrollDate, source_id, age, gander,address, tel, email, education_id,
+    school, major, foreignlanglevel_id, yearsOfWorking, clz_id, paymode_id, clientType_id,
+    state, saleman_id, campus_id, totalTuition,planningTuition, discountAmount, otherCost, otherDiscount,
+    discountDesc, paidTuition, ownTuition, lastPaymentDate, prePaidTuition, paidState,
+    identityNum, urgentContact, urgentTel ,workingExperience
+    from `formalstudent`
+  </select>
+
+  <!--分页数据-->
+  <select id="queryForCount" resultType="int">
+
+    select COUNT(fs.id) from formalstudent fs
+    <include refid="baseSql"/>
+  </select>
+  <select id="queryForList" resultMap="BaseResultMap">
+    select fs.id, fs.name, fs.qqNum, fs.enrollDate, fs.source_id, fs.age, fs.gander,fs.address, fs.tel, fs.email, fs.education_id,
+    fs.school, fs.major, fs.foreignlanglevel_id, fs.yearsOfWorking, fs.clz_id, fs.paymode_id, fs.clientType_id,
+    fs.state, fs.saleman_id, fs.campus_id, fs.totalTuition,fs.planningTuition, fs.discountAmount, fs.otherCost, fs.otherDiscount,
+    fs.discountDesc, fs.paidTuition, fs.ownTuition, fs.lastPaymentDate, fs.prePaidTuition, fs.paidState,
+    fs.identityNum, fs.urgentContact, fs.urgentTel,fs.workingExperience,
+    sour.id AS sour_id,sour.name AS sour_name,
+    edu.id AS edu_id,edu.name AS edu_name,
+    fll.id AS fll_id,fll.name AS fll_name,
+    cms.id AS cms_id,cms.name AS cms_name,
+    ct.id AS ct_id,ct.name AS ct_name,
+    pm.id AS pm_id,pm.name AS pm_name,
+    emp.id AS emp_id,emp.realname AS emp_realname,
+    clz.id AS clz_id,clz.classname AS clz_classname
+    from `formalstudent` fs
+    LEFT JOIN SystemDictionaryItem sour ON fs.source_id = sour.id
+    LEFT JOIN SystemDictionaryItem edu ON fs.education_id = edu.id
+    LEFT JOIN SystemDictionaryItem fll ON fs.foreignlanglevel_id = fll.id
+    LEFT JOIN SystemDictionaryItem cms ON fs.campus_id = cms.id
+    LEFT JOIN SystemDictionaryItem ct ON fs.clientType_id = ct.id
+    LEFT JOIN SystemDictionaryItem pm ON fs.paymode_id = pm.id
+    LEFT JOIN employee emp ON fs.saleman_id = emp.id
+    LEFT JOIN class clz ON fs.clz_id = clz.id
+    <include refid="baseSql"/>
+    limit #{beginIndex},#{rows}
+  </select>
+
+  <select id="selectOwnTuitionByid" resultType="java.math.BigDecimal">
+    select fs.ownTuition from `formalstudent` fs where fs.id = #{id}
+
+  </select>
+  <!--基础查询语句-->
+  <sql id="baseSql">
+    <where>
+      <if test="keyword !=null and keyword != ''">
+        AND (fs.name like concat('%',#{keyword},'%') or fs.clz_id like concat('%',#{keyword},'%'))
+      </if>
+      <if test="paidState != null">
+        and fs.paidState = #{paidState}
+      </if>
+      <if test="state != null">
+        and fs.state = #{state}
+      </if>
+      <if test="clientType != null">
+        and fs.clientType_id = #{clientType}
+      </if>
+      <if test="beginDate != null">
+        and fs.enrollDate >= #{beginDate}
+      </if>
+      <if test="endDate != null">
+        and fs.enrollDate &lt;= #{endDate}
+      </if>
+      <if test="clzId != null">
+        and fs.clz_id = #{clzId}
+      </if>
+    </where>
+  </sql>
+</mapper>

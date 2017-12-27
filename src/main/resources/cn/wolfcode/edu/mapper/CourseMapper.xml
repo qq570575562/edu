@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.CourseMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Course" >
+    <id column="id" property="id" />
+    <result column="date" property="date" />
+    <result column="weekday" property="weekday" />
+    <result column="remark" property="remark" />
+    <result column="state" property="state" />
+    <result column="courseName" property="courseName" />
+    <association  property="classGrade" javaType="cn.wolfcode.edu.domain.ClassGrade" columnPrefix="c_">
+      <id column="id" property="id"></id>
+      <result column="classname" property="className"></result>
+    </association>
+    <association  property="leader" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="leader_">
+      <id column="id" property="id"></id>
+      <result column="realname" property="realname"></result>
+    </association>
+    <association  property="teacher" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="t_">
+      <id column="id" property="id"></id>
+      <result property="realname" column="realname"></result>
+    </association>
+    <association  property="classroom" javaType="cn.wolfcode.edu.domain.Classroom" columnPrefix="cr_">
+      <id column="id" property="id"></id>
+      <result column="name" property="name"></result>
+    </association>
+   
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `course`
+    where id = #{id}
+  </delete>
+  <insert id="insert"  useGeneratedKeys="true" keyProperty="id" >
+    insert into `course` (date, weekday, class_id, courseName, leader_id, teacher_id, 
+      classroom_id, remark, state)
+    values (#{date}, #{weekday}, #{classGrade.id}, #{courseName}, #{leader.id}, #{teacher.id},
+      #{classroom.id}, #{remark}, #{state})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Course" >
+    update `course`
+    set date = #{date},
+      weekday = #{weekday},
+      class_id = #{classGrade.id},
+      courseName = #{courseName},
+      leader_id = #{leader.id},
+      teacher_id = #{teacher.id},
+      classroom_id = #{classroom.id},
+      remark = #{remark},
+      state = #{state}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, date, weekday, class_id, courseName, leader_id, teacher_id, classroom_id, 
+    remark, state
+    from `course`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, date, weekday, class_id, courseName, leader_id, teacher_id, classroom_id, 
+    remark, state
+    from `course`
+  </select>
+  <sql id="whereSql">
+    <where>
+      <if test="classGrade!=null and classGrade!=''">
+        AND  c.classname LIKE  concat('%',#{classGrade},'%')
+      </if>
+      <if test="classroom != null and classroom !=''">
+        and  cr.name LIKE concat('%',#{classroom},'%')
+      </if>
+      <if test="courseName!=null and courseName!=''">
+        and  cs.courseName LIKE concat('%',#{courseName},'%')
+      </if>
+      <if test="teacher != null and teacher != ''">
+        and (t.realname LIKE  concat('%',#{teacher},'%') or t.username like concat('%',#{teacher},'%'))
+      </if>
+      <if test="beginTime != null">
+        and cs.date >= #{beginTime}
+      </if>
+      <if test="endTime!= null">
+        and cs.date &lt;= #{endTime}
+      </if>
+      <if test="date != null">
+        and cs.date = #{date}
+      </if>
+      <if test="classId != null">
+        and cs.class_id = #{classId}
+      </if>
+    </where>
+  </sql>
+
+  <select id="queryForCount" resultType="int">
+    SELECT count(cs.id) FROM course cs
+    LEFT JOIN classroom cr ON cs.classroom_id = cr.id
+    LEFT JOIN class c ON  cs.class_id = c.id
+    LEFT JOIN employee t ON cs.teacher_id = t.id
+    LEFT JOIN employee leader ON cs.leader_id = leader.id
+    <include refid="whereSql"/>
+  </select>
+  <select id="queryForList" resultMap="BaseResultMap">
+    select cs.id, cs.date, cs.weekday, c.id c_id, c.classname c_classname,
+    cs.courseName, leader.id leader_id , leader.realname leader_realname,
+    t.id t_id,t.realname t_realname, cr.id cr_id,cr.name cr_name,
+    cs.remark, cs.state
+    from course cs
+    LEFT JOIN classroom cr ON cs.classroom_id = cr.id
+    LEFT JOIN class c ON  cs.class_id = c.id
+    LEFT JOIN employee t ON cs.teacher_id = t.id
+    LEFT JOIN employee leader ON cs.leader_id = leader.id
+    <include refid="whereSql"/>
+    <if test="sort != null and order != null">
+      order by ${sort} ${order}
+    </if>
+    limit #{beginIndex},#{rows}
+  </select>
+</mapper>

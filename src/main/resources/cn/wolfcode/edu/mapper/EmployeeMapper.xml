@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.edu.mapper.EmployeeMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Employee">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="realname" property="realname"/>
+        <result column="password" property="password"/>
+        <result column="tel" property="tel"/>
+        <result column="email" property="email"/>
+        <result column="inputTime" property="inputTime"/>
+        <result column="salary" property="salary"/>
+        <result column="state" property="state"/>
+        <result column="admin" property="admin"/>
+        <result column="imagePath" property="imagePath"/>
+        <association property="dept" javaType="cn.wolfcode.edu.domain.Department">
+            <id column="d_id" property="id"/>
+            <result column="d_name" property="name"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `employee`
+    where id = #{id}
+  </delete>
+    <delete id="deleteRelation">
+        delete from `employee_role`
+        where employee_id = #{employeeId}
+    </delete>
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into `employee` (username, realname, password, tel, email, dept_id, inputTime,salary,
+      state, `admin`,imagePath)
+    values (#{username}, #{realname}, #{password}, #{tel}, #{email}, #{dept.id}, #{inputTime}, #{salary},
+      #{state}, #{admin},#{imagePath})
+  </insert>
+    <insert id="insertRelation">
+        INSERT INTO employee_role (employee_id,role_id) values
+        <foreach collection="roles" separator="," item="role">
+            (#{employeeId},#{role.id})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Employee">
+        update `employee`
+        set username = #{username},
+        realname = #{realname},
+        tel = #{tel},
+        email = #{email},
+        dept_id = #{dept.id},
+        inputTime = #{inputTime},
+        salary=#{salary},
+        `admin` = #{admin}
+        where id = #{id}
+    </update>
+    <update id="editHead" parameterType="cn.wolfcode.edu.domain.Employee">
+    update `employee`
+    set 
+      imagePath = #{imagePath}
+    where id = #{id}
+  </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, username, realname, password, tel, email, dept_id, inputTime,salary, state, `admin`,imagePath
+    from `employee`
+    where id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, username, realname, password, tel, email, dept_id, inputTime,salary, state, `admin`,imagePath
+    from employee e
+  </select>
+    <select id="queryForCount" resultType="java.lang.Integer">
+        select count(*) from employee e
+        <include refid="baseSql"/>
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+        select e.id, e.username, e.realname, e.tel, e.email, e.dept_id, e.inputTime,e.salary,
+        e.`admin`,e.imagePath,e.state,d.id d_id,d.name
+        d_name
+        from `employee` e
+        LEFT join department d on e.dept_id = d.id
+        <include refid="baseSql"/>
+        ORDER BY e.id
+        limit #{beginIndex},#{rows}
+    </select>
+    <sql id="baseSql">
+        <where>
+            <if test="keyword!=null and keyword != ''">
+                e.username like concat('%',#{keyword},'%') or e.email like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+    <update id="changState">
+        update employee set state = state^1 where id = #{id}
+    </update>
+
+    <select id="getEmployeeByUsername" resultMap="BaseResultMap">
+        select id, username, realname, password, tel, email, dept_id, inputTime,salary, state, `admin`,imagePath
+        from `employee`
+        where username = #{username}
+    </select>
+    <select id="selectByRoleSn" resultMap="BaseResultMap">
+        select id,username,realname from employee
+          WHERE id IN (SELECT employee_id FROM employee_role WHERE role_id = (
+          SELECT id FROM role WHERE sn = #{sn}
+          ));
+    </select>
+
+    <select id="selectByEmployeeId" resultType="long">
+        SELECT role_id FROM employee_role WHERE employee_id=#{employeeId}
+    </select>
+</mapper>

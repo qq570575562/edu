@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.ClassroomMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Classroom" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="address" property="address" />
+    <result column="seatCount" property="seatCount" />
+    <result column="state" property="state" />
+    <result column="slogan" property="slogan" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `classroom`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.Classroom" useGeneratedKeys="true" keyProperty="id" >
+    insert into `classroom` (name, address, seatCount, state, slogan)
+    values (#{name}, #{address}, #{seatCount}, #{state}, #{slogan})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Classroom" >
+    update `classroom`
+    set name = #{name},
+      address = #{address},
+      seatCount = #{seatCount},
+      state = #{state},
+      slogan = #{slogan}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, name, address, seatCount, state, slogan
+    from `classroom`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, address, seatCount, state, slogan
+    from `classroom`
+  </select>
+  <sql id="whereSql">
+    <where>
+      <if test="keyword!=null and keyword !=''">
+        name LIKE concat('%',#{keyword},'%') or address like concat('%',#{keyword},'%') or
+        slogan like concat('%',#{keyword},'%')
+      </if>
+    </where>
+  </sql>
+  <select id="queryForCount" resultType="java.lang.Integer">
+    SELECT count(id) FROM classroom
+    <include refid="whereSql"></include>
+  </select>
+  <select id="queryForList" resultMap="BaseResultMap">
+    select id, name, address, seatCount, state, slogan
+    FROM classroom
+    <include refid="whereSql"></include>
+    limit #{beginIndex},#{rows}
+  </select>
+  <update id="changeState">
+    UPDATE classroom SET state = state ^ 1 WHERE  id = #{id}
+  </update>
+</mapper>

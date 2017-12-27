@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.edu.mapper.PaymentMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.edu.domain.Payment" >
+    <id column="id" property="id" />
+    <result column="date" property="date" />
+    <result column="cost" property="cost" />
+    <result column="digest" property="digest" />
+    <result column="costtype" property="costtype" />
+    <result column="docnumber" property="docnumber" />
+    <result column="state" property="state" />
+    <association property="payer" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="payer_">
+      <id property="id" column="id"></id>
+      <result property="realname" column="realname"></result>
+    </association>
+    <association property="brokerage" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="brokerage_">
+      <id property="id" column="id"></id>
+      <result property="realname" column="realname"></result>
+    </association>
+    <association property="paymode" javaType="cn.wolfcode.edu.domain.SystemDictionaryItem" columnPrefix="paymode_">
+      <id property="id" column="id"></id>
+      <result property="name" column="name"></result>
+    </association>
+    <association property="classGrade" javaType="cn.wolfcode.edu.domain.ClassGrade" columnPrefix="c_">
+      <id property="id" column="id"></id>
+      <result property="className" column="classname"></result>
+    </association>
+    <association property="auditor" javaType="cn.wolfcode.edu.domain.Employee" columnPrefix="auditor_">
+      <id property="id" column="id"></id>
+      <result property="realname" column="realname"></result>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `payment`
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="cn.wolfcode.edu.domain.Payment" useGeneratedKeys="true" keyProperty="id" >
+    insert into `payment` (date, cost, digest, payer_id, brokerage_id, paymode_id, costtype, 
+      docnumber, class_id, auditor_id, state)
+    values (#{date}, #{cost}, #{digest}, #{payer.id}, #{brokerage.id}, #{paymode.id}, #{costtype},
+      #{docnumber}, #{classGrade.id}, #{auditor.id}, #{state})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.edu.domain.Payment" >
+    update `payment`
+    set date = #{date},
+      cost = #{cost},
+      digest = #{digest},
+      payer_id = #{payer.id},
+      brokerage_id = #{brokerage.id},
+      paymode_id = #{paymode.id},
+      costtype = #{costtype},
+      docnumber = #{docnumber},
+      class_id = #{classGrade.id},
+      auditor_id = #{auditor.id},
+      state = #{state}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, date, cost, digest, payer_id, brokerage_id, paymode_id, costtype, docnumber, 
+    class_id, auditor_id, state
+    from `payment`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, date, cost, digest, payer_id, brokerage_id, paymode_id, costtype, docnumber, 
+    class_id, auditor_id, state
+    from `payment`
+  </select>
+  <sql id="baseSql">
+    <where>
+      <if test="classId != null">
+        and pay.class_id = #{classId}
+      </if>
+      <if test="payModeId != null">
+        and pay.paymode_id = #{payModeId}
+      </if>
+      <if test="payBeginTime != null">
+        and pay.date >= #{payBeginTime}
+      </if>
+      <if test="payEndTime != null">
+        and pay.date &lt;= #{payEndTime}
+      </if>
+    </where>
+  </sql>
+  <select id="queryForCount" resultType="int">
+    select count(*) from payment pay
+    <include refid="baseSql"/>
+  </select>
+  <select id="queryForList" resultMap="BaseResultMap">
+    SELECT pay.id,pay.date,pay.cost,pay.digest,pay.costtype,pay.docnumber,pay.state,
+    payer.id payer_id,payer.realname payer_realname,brokerage.id brokerage_id,
+    brokerage.realname brokerage_realname,paymode.id paymode_id,paymode.name paymode_name,
+    c.id c_id,c.classname c_classname,auditor.id auditor_id,auditor.realname auditor_realname
+    FROM payment pay
+    LEFT JOIN employee payer ON pay.payer_id = payer.id
+    LEFT JOIN employee brokerage ON pay.brokerage_id = brokerage.id
+    LEFT JOIN systemdictionaryitem paymode ON pay.paymode_id = paymode.id
+    LEFT JOIN class c ON pay.class_id = c.id
+    LEFT JOIN employee auditor ON pay.auditor_id = auditor.id
+    <include refid="baseSql"/>
+    <if test="sort != null and order != null">
+      ORDER BY ${sort} ${order}
+    </if>
+    limit #{beginIndex},#{rows}
+  </select>
+  <update id="audit">
+    UPDATE payment SET state = 1, auditor_id = #{auditorId} where id = #{paymentId}
+  </update>
+</mapper>
